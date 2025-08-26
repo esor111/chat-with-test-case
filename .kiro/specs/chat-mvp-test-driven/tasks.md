@@ -21,7 +21,7 @@ This implementation plan follows the Blue → Red → Green methodology to build
 
 ## Phase 2: User Outcome Implementation (Red → Green Cycles)
 
-- [ ] 3. Implement user sees chat list functionality
+- [x] 3. Implement user sees chat list functionality
 - [x] 3.1 Convert chat list test to Red (fail with real expectations)
   - Replace expect(true).toBe(true) with expect(chatList.length).toBeGreaterThan(0)
   - Run ONLY this test - confirm it fails for right reason (ChatService not defined)
@@ -33,38 +33,38 @@ This implementation plan follows the Blue → Red → Green methodology to build
   - Run ONLY this test - confirm it passes
   - _Requirements: 1.1, 7.3_
 
-- [ ] 4. Implement user opens chat shows history functionality
-- [ ] 4.1 Convert chat history test to Red
+- [x] 4. Implement user opens chat shows history functionality
+- [x] 4.1 Convert chat history test to Red
   - Replace skeleton with expect(messages.length).toBeGreaterThan(0)
   - Run ONLY this test - confirm it fails (getChatHistory not implemented)
   - _Requirements: 2.1, 7.2_
 
-- [ ] 4.2 Make chat history test Green
+- [x] 4.2 Make chat history test Green
   - Add getChatHistory method to ChatService with hardcoded messages
   - Return [{id: 'msg1', senderUuid: 'uuid-456', content: 'Hello', timestamp: new Date()}]
   - Run ONLY this test - confirm it passes
   - _Requirements: 2.1, 7.3_
 
-- [ ] 5. Implement user sends message shows locally functionality
-- [ ] 5.1 Convert send message test to Red
+- [x] 5. Implement user sends message shows locally functionality
+- [x] 5.1 Convert send message test to Red
   - Replace skeleton with expect(response.status).toBe('sent')
   - Run ONLY this test - confirm it fails (sendMessage not implemented)
   - _Requirements: 3.1, 7.2_
 
-- [ ] 5.2 Make send message test Green
+- [x] 5.2 Make send message test Green
   - Add sendMessage method that logs to console and returns {status: 'sent'}
   - Run ONLY this test - confirm it passes
   - _Requirements: 3.1, 7.3_
 
 ## Phase 3: Infrastructure Integration (Only When Tests Demand It)
 
-- [ ] 6. Add PostgreSQL when persistence test fails
-- [ ] 6.1 Convert persistence test to Red
+- [x] 6. Add PostgreSQL when persistence test fails
+- [x] 6.1 Convert persistence test to Red
   - Create test that sends message, restarts app, checks message still exists
   - Run test - confirm it fails (no persistence, hardcoded data disappears)
   - _Requirements: 4.1, 7.2_
 
-- [ ] 6.2 Add minimal PostgreSQL setup
+- [x] 6.2 Add minimal PostgreSQL setup
   - Add @nestjs/typeorm and pg dependencies
   - Create Message entity with senderUuid, content, timestamp (no names)
   - Create MessageRepository with basic save/find methods
@@ -77,13 +77,13 @@ This implementation plan follows the Blue → Red → Green methodology to build
   - Run test - confirm database connectivity works
   - _Requirements: 9.2_
 
-- [ ] 7. Add Socket.io when real-time test fails
-- [ ] 7.1 Convert real-time delivery test to Red
+- [x] 7. Add Socket.io when real-time test fails
+- [x] 7.1 Convert real-time delivery test to Red
   - Create test where user A sends message, user B receives it immediately
   - Run test - confirm it fails (no real-time delivery mechanism)
   - _Requirements: 5.1, 7.2_
 
-- [ ] 7.2 Add minimal Socket.io setup
+- [x] 7.2 Add minimal Socket.io setup
   - Add @nestjs/websockets and socket.io dependencies
   - Create ChatGateway with basic message events
   - Update ChatService to emit socket events when messages sent
