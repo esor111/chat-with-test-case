@@ -111,3 +111,158 @@ export function expectLeastBusyAssignment(agents: any[], assignedAgentId: string
     expect(assignedWorkload).toBeLessThanOrEqual(agentWorkload);
   });
 }
+
+// Business chat simulation utilities
+export function simulateAgentAssignment(businessId: string, availableAgents: any[], algorithm: 'round_robin' | 'least_busy' = 'round_robin'): any {
+  const businessAgents = availableAgents.filter(agent => 
+    agent.businessId === businessId && 
+    agent.status === 'available' && 
+    agent.currentChatCount < agent.maxConcurrentChats
+  );
+
+  if (businessAgents.length === 0) {
+    return {
+      success: false,
+      error: 'No available agents',
+      fallback: 'queue_customer'
+    };
+  }
+
+  let selectedAgent;
+  if (algorithm === 'round_robin') {
+    selectedAgent = businessAgents.reduce((prev, current) => 
+      prev.currentChatCount <= current.currentChatCount ? prev : current
+    );
+  } else {
+    selectedAgent = businessAgents.reduce((prev, current) => {
+      const prevLoad = prev.currentChatCount / prev.maxConcurrentChats;
+      const currentLoad = current.currentChatCount / current.maxConcurrentChats;
+      return prevLoad <= currentLoad ? prev : current;
+    });
+  }
+
+  return {
+    success: true,
+    assignedAgent: selectedAgent,
+    algorithm,
+    assignedAt: new Date(),
+    businessId
+  };
+}
+
+export function simulateBusinessConversationCreation(customerId: string, businessId: string, priority: 'low' | 'medium' | 'high' = 'medium'): any {
+  return {
+    conversationId: `business-conv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    type: 'business',
+    customerId,
+    businessId,
+    priority,
+    status: 'pending_agent_assignment',
+    createdAt: new Date(),
+    metadata: {
+      customerContext: {
+        accountType: 'standard',
+        previousInteractions: 0,
+        preferredLanguage: 'en'
+      },
+      businessContext: {
+        department: 'general_support',
+        category: 'inquiry'
+      }
+    }
+  };
+}
+
+export function simulateAgentResponse(conversationId: string, agentId: string, message: string, responseTime?: number): any {
+  return {
+    conversationId,
+    agentId,
+    message,
+    timestamp: new Date(),
+    responseTime: responseTime || Math.floor(Math.random() * 300) + 30, // 30-330 seconds
+    messageType: 'agent_response',
+    metadata: {
+      source: 'agent_dashboard',
+      automated: false
+    }
+  };
+}
+
+export function simulateAgentReassignment(conversationId: string, fromAgentId: string, toAgentId: string, reason: string): any {
+  return {
+    conversationId,
+    fromAgentId,
+    toAgentId,
+    reason,
+    reassignedAt: new Date(),
+    metadata: {
+      previousAgentStats: {
+        responseTime: Math.floor(Math.random() * 300) + 60,
+        messagesHandled: Math.floor(Math.random() * 10) + 1
+      }
+    }
+  };
+}
+
+export function simulateBusinessHoursCheck(businessId: string, timezone: string = 'UTC'): any {
+  const now = new Date();
+  const currentHour = now.getUTCHours(); // Simplified for UTC
+  
+  // Simulate business hours 9 AM - 5 PM UTC
+  const isBusinessHours = currentHour >= 9 && currentHour < 17;
+  
+  return {
+    businessId,
+    timezone,
+    currentTime: now,
+    isBusinessHours,
+    nextOpenTime: isBusinessHours ? null : new Date(now.getTime() + (24 - currentHour + 9) * 60 * 60 * 1000),
+    businessHours: {
+      start: '09:00',
+      end: '17:00',
+      timezone
+    }
+  };
+}
+
+export function simulateAgentWorkloadUpdate(agentId: string, action: 'assign' | 'complete', conversationId?: string): any {
+  return {
+    agentId,
+    action,
+    conversationId,
+    timestamp: new Date(),
+    workloadChange: action === 'assign' ? +1 : -1,
+    metadata: {
+      source: 'workload_manager',
+      reason: action === 'assign' ? 'new_conversation_assigned' : 'conversation_completed'
+    }
+  };
+}
+
+// Business chat testing scenarios
+export function createBusinessChatTestScenario(name: string, config: {
+  businessId: string;
+  agents: Array<{ id: string; status: 'available' | 'busy' | 'offline'; currentChats: number; maxChats: number }>;
+  customers: Array<{ id: string; priority: 'low' | 'medium' | 'high' }>;
+}): any {
+  return {
+    scenarioName: name,
+    createdAt: new Date(),
+    businessId: config.businessId,
+    agents: config.agents.map(agent => ({
+      uuid: agent.id,
+      businessId: config.businessId,
+      name: `Agent ${agent.id}`,
+      status: agent.status,
+      currentChatCount: agent.currentChats,
+      maxConcurrentChats: agent.maxChats,
+      skills: ['general']
+    })),
+    pendingCustomers: config.customers.map(customer => ({
+      customerId: customer.id,
+      priority: customer.priority,
+      waitingSince: new Date(),
+      estimatedWaitTime: Math.floor(Math.random() * 300) + 60 // 1-5 minutes
+    }))
+  };
+}

@@ -145,3 +145,147 @@ export function expectGracefulOfflineTransition(transition: any): void {
   expect(['websocket_disconnect', 'inactivity', 'manual']).toContain(transition.reason);
   expect(transition.timestamp).toBeInstanceOf(Date);
 }
+
+// Presence simulation utilities
+export function simulateUserOnline(userUuid: string, deviceId?: string): any {
+  return {
+    userUuid,
+    status: 'online',
+    lastSeenAt: new Date(),
+    deviceCount: 1,
+    devices: [deviceId || `device-${userUuid}-${Date.now()}`],
+    lastActivity: new Date()
+  };
+}
+
+export function simulateUserAway(userUuid: string, minutesAgo: number = 6): any {
+  const awayTime = new Date(Date.now() - minutesAgo * 60 * 1000);
+  return {
+    userUuid,
+    status: 'away',
+    lastSeenAt: awayTime,
+    deviceCount: 1,
+    devices: [`device-${userUuid}-away`],
+    lastActivity: awayTime
+  };
+}
+
+export function simulateUserOffline(userUuid: string, minutesAgo: number = 15): any {
+  const offlineTime = new Date(Date.now() - minutesAgo * 60 * 1000);
+  return {
+    userUuid,
+    status: 'offline',
+    lastSeenAt: offlineTime,
+    deviceCount: 0,
+    devices: [],
+    lastActivity: offlineTime
+  };
+}
+
+export function simulateMultiDeviceUser(userUuid: string, deviceCount: number = 2): any {
+  const devices = Array.from({ length: deviceCount }, (_, i) => 
+    `device-${userUuid}-${i + 1}-${Date.now()}`
+  );
+  
+  return {
+    userUuid,
+    status: 'online',
+    lastSeenAt: new Date(),
+    deviceCount,
+    devices,
+    lastActivity: new Date()
+  };
+}
+
+export function simulateDeviceConnection(userUuid: string, deviceType: 'web' | 'mobile' | 'desktop' = 'web'): any {
+  return {
+    deviceId: `device-${userUuid}-${deviceType}-${Date.now()}`,
+    userUuid,
+    deviceType,
+    connectedAt: new Date(),
+    lastActivity: new Date(),
+    socketId: `socket-${userUuid}-${deviceType}-${Math.random().toString(36).substr(2, 9)}`
+  };
+}
+
+export function simulateDeviceDisconnection(device: any, reason: 'manual' | 'timeout' | 'error' = 'manual'): any {
+  return {
+    ...device,
+    disconnectedAt: new Date(),
+    disconnectReason: reason,
+    socketId: null
+  };
+}
+
+export function simulatePresenceUpdate(userUuid: string, newStatus: 'online' | 'away' | 'offline', reason?: string): any {
+  return {
+    userUuid,
+    previousStatus: 'online', // Default previous status
+    newStatus,
+    timestamp: new Date(),
+    reason: reason || 'activity_change',
+    deviceCount: newStatus === 'offline' ? 0 : 1
+  };
+}
+
+export function simulateActivityHeartbeat(userUuid: string, deviceId: string, activityType: 'message' | 'websocket' | 'api_call' | 'heartbeat' = 'heartbeat'): any {
+  return {
+    userUuid,
+    deviceId,
+    activityType,
+    timestamp: new Date(),
+    metadata: {
+      source: 'test_simulation',
+      sessionId: `session-${userUuid}-${Date.now()}`
+    }
+  };
+}
+
+export function simulatePresenceBroadcast(userUuid: string, status: 'online' | 'away' | 'offline', recipients: string[]): any {
+  return {
+    userUuid,
+    status,
+    timestamp: new Date(),
+    recipients,
+    broadcastId: `broadcast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    metadata: {
+      source: 'presence_service',
+      reason: 'status_change'
+    }
+  };
+}
+
+export function simulateInactivityDetection(userUuid: string, lastActivity: Date, thresholdMinutes: number = 5): any {
+  const timeSinceActivity = Date.now() - lastActivity.getTime();
+  const thresholdMs = thresholdMinutes * 60 * 1000;
+  
+  return {
+    userUuid,
+    lastActivity,
+    timeSinceActivity,
+    thresholdMs,
+    isInactive: timeSinceActivity > thresholdMs,
+    detectedAt: new Date(),
+    recommendedStatus: timeSinceActivity > 10 * 60 * 1000 ? 'offline' : 'away'
+  };
+}
+
+// Presence testing scenarios
+export function createPresenceTestScenario(name: string, users: Array<{ uuid: string; status: 'online' | 'away' | 'offline'; deviceCount?: number }>): any {
+  return {
+    scenarioName: name,
+    createdAt: new Date(),
+    users: users.map(user => ({
+      userUuid: user.uuid,
+      status: user.status,
+      deviceCount: user.deviceCount || (user.status === 'offline' ? 0 : 1),
+      devices: user.status === 'offline' ? [] : 
+        Array.from({ length: user.deviceCount || 1 }, (_, i) => `device-${user.uuid}-${i + 1}`),
+      lastActivity: user.status === 'offline' ? 
+        new Date(Date.now() - 15 * 60 * 1000) : 
+        user.status === 'away' ? 
+          new Date(Date.now() - 6 * 60 * 1000) : 
+          new Date()
+    }))
+  };
+}
