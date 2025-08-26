@@ -14,6 +14,6 @@ export class Message {
   @Column('text')
   content: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ precision: 6 })
   timestamp: Date;
 }
