@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 import { ChatGateway } from './chat.gateway';
+import { HealthController } from './health.controller';
 import { Message } from './message.entity';
 import { MessageRead } from './message-read.entity';
 
@@ -23,7 +24,7 @@ import { MessageRead } from './message-read.entity';
     }),
     TypeOrmModule.forFeature([Message, MessageRead]),
   ],
-  controllers: [AppController, ChatController],
+  controllers: [AppController, ChatController, HealthController],
   providers: [AppService, ChatService, ChatGateway],
 })
 export class AppModule {}

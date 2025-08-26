@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Body } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, HttpCode } from '@nestjs/common';
 import { ChatService } from './chat.service';
 
 @Controller('chats')
@@ -24,6 +24,7 @@ export class ChatController {
   }
 
   @Post(':chatId/messages/:messageId/read')
+  @HttpCode(200)
   async markMessageAsRead(@Param('messageId') messageId: string, @Body() readData: any) {
     // Minimal implementation to pass the test
     return await this.chatService.markAsRead(messageId, readData.readerUuid);

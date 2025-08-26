@@ -71,7 +71,7 @@ This implementation plan follows the Blue → Red → Green methodology to build
   - Update ChatService to use database instead of hardcoded data
   - _Requirements: 4.1, 9.2, 7.3_
 
-- [ ] 6.3 Convert database connection test to Red then Green
+- [x] 6.3 Convert database connection test to Red then Green
   - Replace skeleton with actual SELECT 1 query test
   - Implement TypeORM connection with minimal configuration
   - Run test - confirm database connectivity works
@@ -90,7 +90,7 @@ This implementation plan follows the Blue → Red → Green methodology to build
   - Run test - confirm real-time delivery works
   - _Requirements: 5.1, 9.4, 7.3_
 
-- [ ] 7.3 Convert socket connection test to Red then Green
+- [x] 7.3 Convert socket connection test to Red then Green
   - Replace skeleton with actual client connection test
   - Implement WebSocket server with ping-pong handling
   - Run test - confirm socket connectivity works

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Message } from './message.entity';
 import { MessageRead } from './message-read.entity';
 
@@ -34,6 +34,18 @@ export class ChatService {
   setChatGateway(gateway: any) {
     this.chatGateway = gateway;
   }
+
+  getWebSocketHealth() {
+    if (!this.chatGateway) {
+      return {
+        isRunning: false,
+        activeConnections: 0,
+        error: 'ChatGateway not initialized'
+      };
+    }
+
+    return this.chatGateway.getServerHealth();
+  }
   async getChatList(userId: string): Promise<ChatPreview[]> {
     // Hardcoded response to pass the test - dumbest possible solution
     return [
@@ -58,7 +70,7 @@ export class ChatService {
       // Get read receipts for these messages
       const messageIds = dbMessages.map(msg => msg.id);
       const readReceipts = await this.messageReadRepository.find({
-        where: { messageId: messageIds as any }
+        where: { messageId: In(messageIds) }
       });
 
       // Group read receipts by message ID

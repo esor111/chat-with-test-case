@@ -198,7 +198,7 @@ describe('User Outcomes (Blue Phase - All Skeleton Tests)', () => {
     
     expect(readMessage).toBeDefined();
     expect(readMessage).toHaveProperty('readBy');
-    expect(readMessage.readBy).toContain('uuid-recipient');
+    expect(readMessage.readBy).toHaveProperty('uuid-recipient');
     expect(readMessage.readBy['uuid-recipient']).toBeDefined();
   });
 });
